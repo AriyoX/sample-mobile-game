@@ -6,9 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 const { width, height } = Dimensions.get('window');
 
 const WordGameScreen = () => {
-  const [currentWord, setCurrentWord] = useState('TREE');
-  const [displayWord, setDisplayWord] = useState('T___');
-  const [letters, setLetters] = useState(['A', 'E', 'B', 'L', 'R']);
+  const [currentWord, setCurrentWord] = useState('KANZU');
+  const [displayWord, setDisplayWord] = useState('K____');
+  const [currentQuestion, setCurrentQuestion] = useState('Traditional attire in Buganda culture');
+  const [letters, setLetters] = useState(['A', 'N', 'Z', 'U', 'B', 'L', 'R', 'T', 'S', 'M']);
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [correctSound, setCorrectSound] = useState();
   const [wrongSound, setWrongSound] = useState();
@@ -207,6 +208,11 @@ const WordGameScreen = () => {
         />
       </View>
       
+      {/* Question text */}
+      <View style={styles.questionContainer}>
+        <Text style={styles.questionText}>{currentQuestion}</Text>
+      </View>
+      
       {/* Letter circles */}
       <View style={styles.lettersContainer}>
         {letters.map((letter, index) => (
@@ -326,19 +332,40 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
+  questionContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    marginTop: 80,
+    marginBottom: 10,
+    maxWidth: '90%',
+    alignSelf: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#5D3A00',
+    textAlign: 'center',
+  },
   lettersContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 100,
+    marginTop: 20,
     width: '100%',
   },
   letterCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#FF6B95', // Pink color
-    margin: 10,
+    margin: 8,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
