@@ -74,33 +74,44 @@ const WordGameScreen = () => {
         wordRef.measureLayout(
           containerRef.current,
           (wordX, wordY, wordWidth, wordHeight) => {
-            // Calculate center points
-            const startX = letterX + letterWidth / 2;
-            const startY = letterY + letterHeight / 2;
-            const endX = wordX + wordWidth / 2;
-            const endY = wordY + wordHeight / 2;
+            // Set initial position - this is the key change
+            setAnimatingLetter({ 
+              letter, 
+              index: destinationIndex,
+              startX: letterX,
+              startY: letterY,
+              endX: wordX,
+              endY: wordY,
+              width: letterWidth,
+              height: letterHeight,
+              destWidth: wordWidth,
+              destHeight: wordHeight
+            });
             
-            // Set initial position
-            flyingLetterPosition.setValue({ x: startX, y: startY });
             flyingLetterOpacity.setValue(1);
-            setAnimatingLetter({ letter, index: destinationIndex });
+            flyingLetterPosition.setValue({ x: 0, y: 0 });
             
             // Animate the letter flying
             Animated.parallel([
-              Animated.timing(flyingLetterPosition, {
-                toValue: { x: endX, y: endY },
-                duration: 500,
+              Animated.timing(flyingLetterPosition.x, {
+                toValue: wordX - letterX + (wordWidth - letterWidth) / 2,
+                duration: 600,
+                useNativeDriver: true,
+              }),
+              Animated.timing(flyingLetterPosition.y, {
+                toValue: wordY - letterY + (wordHeight - letterHeight) / 2,
+                duration: 600,
                 useNativeDriver: true,
               }),
               Animated.sequence([
                 Animated.timing(flyingLetterScale, {
-                  toValue: 0.8,
-                  duration: 250,
+                  toValue: 1.2,
+                  duration: 300,
                   useNativeDriver: true,
                 }),
                 Animated.timing(flyingLetterScale, {
                   toValue: 1,
-                  duration: 250,
+                  duration: 300,
                   useNativeDriver: true,
                 }),
               ])
@@ -281,6 +292,10 @@ const WordGameScreen = () => {
           style={[
             styles.flyingLetter,
             {
+              left: animatingLetter.startX,
+              top: animatingLetter.startY,
+              width: animatingLetter.width,
+              height: animatingLetter.height,
               transform: [
                 { translateX: flyingLetterPosition.x },
                 { translateY: flyingLetterPosition.y },
@@ -447,8 +462,6 @@ const styles = StyleSheet.create({
   },
   flyingLetter: {
     position: 'absolute',
-    width: 50,
-    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 100,
