@@ -48,12 +48,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="puzzle"
+        options={{
+          title: 'Puzzle Game',
+          headerStyle: {
+            backgroundColor: '#FFF9E6',
+          },
+          headerTintColor: '#873600',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="puzzlepiece.fill" color={color} />,
+        }}
+      />
+     <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
-      />
+      /> 
     </Tabs>
   );
 }

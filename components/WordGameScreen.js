@@ -331,14 +331,25 @@ const WordGameScreen = () => {
       </View>
 
       {/* Reading Game button */}
-      <TouchableOpacity 
-        style={styles.gameButton}
-        onPress={() => router.push('/(tabs)/reading')}
-        accessibilityLabel="Go to Reading Game"
-        accessibilityRole="button"
-      >
-        <Text style={styles.gameButtonText}>Reading Game</Text>
-      </TouchableOpacity>
+      <View style={styles.gameButtonContainer}>
+        <TouchableOpacity 
+          style={styles.gameButton}
+          onPress={() => router.push('/(tabs)/reading')}
+          accessibilityLabel="Go to Reading Game"
+          accessibilityRole="button"
+        >
+          <Text style={styles.gameButtonText}>Reading Game</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.gameButton}
+          onPress={() => router.push('/(tabs)/puzzle')}
+          accessibilityLabel="Go to Puzzle Game"
+          accessibilityRole="button"
+        >
+          <Text style={styles.gameButtonText}>Puzzle Game</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -499,6 +510,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  gameButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 10,
   },
 });
 
