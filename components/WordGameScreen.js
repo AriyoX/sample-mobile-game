@@ -330,7 +330,7 @@ const WordGameScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Reading Game button */}
+      {/* Reading Game button
       <View style={styles.gameButtonContainer}>
         <TouchableOpacity 
           style={styles.gameButton}
@@ -349,7 +349,7 @@ const WordGameScreen = () => {
         >
           <Text style={styles.gameButtonText}>Puzzle Game</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };

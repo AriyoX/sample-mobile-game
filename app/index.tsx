@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
@@ -8,7 +8,7 @@ const HomeScreen = () => {
 
   // Fixed typing issue by using specific route paths
   const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore') => {
-    router.push(`/(tabs)/${game}`);
+    router.push(`/${game}`); // No more (tabs) prefix
   };
   
   // For index tab, we need a separate method
@@ -17,7 +17,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
       <Stack.Screen 
         options={{
@@ -25,32 +25,33 @@ const HomeScreen = () => {
         }}
       />
       
-      {/* Header with profile and level */}
-      <View style={styles.header}>
-        <View style={styles.profileSection}>
-          <Image 
-            source={require('../assets/images/avatar.png')} // Using a known existing image
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileName}>Grace</Text>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {/* Header with profile and level */}
+        <View style={styles.header}>
+          <View style={styles.profileSection}>
+            <Image 
+              source={require('../assets/images/avatar.png')}
+              style={styles.profileImage}
+            />
+            <Text style={styles.profileName}>Grace</Text>
+          </View>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelText}>Level 1</Text>
+          </View>
         </View>
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>Level 1</Text>
+        
+        {/* Main banner with dinosaur character */}
+        <View style={styles.mainBanner}>
+          <Text style={styles.bannerText}>Let's play{'\n'}with us!</Text>
+          <View style={styles.charactersContainer}>
+            <Image 
+              source={require('../assets/images/boni-character.png')} 
+              style={styles.dinoImage}
+            />
+          </View>
         </View>
-      </View>
-      
-      {/* Main banner with dinosaur character */}
-      <View style={styles.mainBanner}>
-        <Text style={styles.bannerText}>Let's play{'\n'}with us!</Text>
-        <View style={styles.charactersContainer}>
-          <Image 
-            source={require('../assets/images/boni-character.png')} 
-            style={styles.dinoImage}
-          />
-        </View>
-      </View>
-      
-      <View style={styles.gameRow}>
+        
+        <View style={styles.gameRow}>
           <TouchableOpacity 
             style={[styles.gameCard, styles.wordsCard]}
             onPress={() => navigateToGame('word')}
@@ -58,7 +59,7 @@ const HomeScreen = () => {
             accessibilityHint="Play word games to learn vocabulary"
           >
             <Image 
-              source={require('../assets/images/blocks.png')} // Using a known existing image
+              source={require('../assets/images/blocks.png')}
               style={styles.gameIcon}
             />
             <Text style={styles.gameTitle}>Word Game</Text>
@@ -86,7 +87,7 @@ const HomeScreen = () => {
             accessibilityHint="Solve Buganda cultural puzzles"
           >
             <Image 
-              source={require('../assets/images/puzzle.png')} // Using a known existing image
+              source={require('../assets/images/puzzle.png')}
               style={styles.gameIcon}
             />
             <Text style={styles.gameTitle}>Buganda{'\n'}Puzzle</Text>
@@ -99,12 +100,16 @@ const HomeScreen = () => {
             accessibilityHint="Explore more features"
           >
             <Image 
-              source={require('../assets/images/explore.png')} // Using a known existing image
+              source={require('../assets/images/explore.png')}
               style={styles.gameIcon}
             />
             <Text style={styles.gameTitle}>Explore</Text>
           </TouchableOpacity>
         </View>
+        
+        {/* Add padding at bottom to prevent navigation from covering content */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
       
       {/* Bottom navigation */}
       <View style={styles.bottomNav}>
@@ -137,10 +142,18 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#56B4FF',
+    // Ensure we have padding for the status bar on Android
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
     padding: 16,
+    paddingBottom: 0, // We have separate padding at bottom
   },
   header: {
     flexDirection: 'row',
@@ -205,10 +218,6 @@ const styles = StyleSheet.create({
     right: 5,
     bottom: -5,
   },
-  gameGrid: {
-    flex: 1,
-    marginBottom: 70, // Space for bottom nav
-  },
   gameRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -228,16 +237,16 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   wordsCard: {
-    backgroundColor: '#9DE7A9', // Match the header color of Word Game
+    backgroundColor: '#9DE7A9',
   },
   readingCard: {
-    backgroundColor: '#F5E9BE', // Match the header color of Reading Game
+    backgroundColor: '#F5E9BE',
   },
   puzzleCard: {
-    backgroundColor: '#FFF9E6', // Match the header color of Puzzle Game
+    backgroundColor: '#FFF9E6',
   },
   exploreCard: {
-    backgroundColor: '#D0D0D0', // Gray color for Explore
+    backgroundColor: '#D0D0D0',
   },
   gameIcon: {
     width: 50,
@@ -249,6 +258,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#000',
+  },
+  // Add bottom padding to prevent content from being covered by navigation
+  bottomPadding: {
+    height: 90, // Enough space for bottom nav plus extra padding
   },
   bottomNav: {
     flexDirection: 'row',
