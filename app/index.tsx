@@ -7,7 +7,7 @@ const HomeScreen = () => {
   const router = useRouter();
 
   // Fixed typing issue by using specific route paths
-  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore') => {
+  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore' | 'luganda') => {
     router.push(`/${game}`); // No more (tabs) prefix
   };
   
@@ -94,16 +94,16 @@ const HomeScreen = () => {
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.gameCard, styles.exploreCard]}
-            onPress={() => navigateToGame('explore')}
-            accessibilityLabel="Explore"
-            accessibilityHint="Explore more features"
+            style={[styles.gameCard, styles.lugandaCard]}
+            onPress={() => navigateToGame('luganda')}
+            accessibilityLabel="Luganda Learning"
+            accessibilityHint="Learn Luganda language vocabulary"
           >
             <Image 
-              source={require('../assets/images/explore.png')}
+              source={require('../assets/images/blocks.png')}
               style={styles.gameIcon}
             />
-            <Text style={styles.gameTitle}>Explore</Text>
+            <Text style={styles.gameTitle}>Luganda{'\n'}Learning</Text>
           </TouchableOpacity>
         </View>
         
@@ -247,6 +247,9 @@ const styles = StyleSheet.create({
   },
   exploreCard: {
     backgroundColor: '#D0D0D0',
+  },
+  lugandaCard: {
+    backgroundColor: '#E3F2FD',
   },
   gameIcon: {
     width: 50,

@@ -117,6 +117,25 @@ export default function RootLayout() {
           }}
         />
         
+        <Stack.Screen
+          name="luganda"
+          options={{
+            title: 'Luganda Learning',
+            headerStyle: { backgroundColor: '#E3F2FD' },
+            headerTintColor: '#1CB0F6',
+            headerLeft: () => (
+              <TouchableOpacity
+                style={{ marginLeft: 16 }}
+                onPress={goBackToHome}
+                accessibilityLabel="Go back to home"
+                accessibilityHint="Returns to the home screen"
+              >
+                <IconSymbol size={28} name="chevron.left" color="#1CB0F6" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
