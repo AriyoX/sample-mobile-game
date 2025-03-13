@@ -190,14 +190,14 @@ const styles = StyleSheet.create({
   mainBanner: {
     backgroundColor: '#4EACFE',
     borderRadius: 30,
-    padding: 20,
-    marginBottom: 16,
-    height: 180,
+    padding: 24,  // Increased padding
+    marginBottom: 20,  // Increased margin
+    height: 220,  // Increased from 180
     overflow: 'hidden',
     position: 'relative',
   },
   bannerText: {
-    fontSize: 24,
+    fontSize: 28,  // Increased from 24
     fontWeight: 'bold',
     color: '#FFF',
     width: '50%',
@@ -206,16 +206,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     bottom: 0,
-    width: '60%',
+    width: '65%',  // Slightly increased
     height: '100%',
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
   },
   dinoImage: {
-    width: 120,
-    height: 150,
+    width: 140,  // Increased from 120
+    height: 175,  // Increased from 150
     position: 'absolute',
-    right: 5,
+    right: 10,
     bottom: -5,
   },
   gameRow: {
@@ -225,9 +225,9 @@ const styles = StyleSheet.create({
   },
   gameCard: {
     width: '48%',
-    height: 120,
+    height: 160, // Increased from 120
     borderRadius: 20,
-    padding: 16,
+    padding: 20, // Increased from 16
     justifyContent: 'flex-end',
     alignItems: 'center',
     elevation: 4,
@@ -252,12 +252,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#E3F2FD',
   },
   gameIcon: {
-    width: 50,
-    height: 50,
-    marginBottom: 8,
+    width: 65, // Increased from 50
+    height: 65, // Increased from 50
+    marginBottom: 10, // Increased from 8
   },
   gameTitle: {
-    fontSize: 14,
+    fontSize: 16, // Increased from 14
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#000',
