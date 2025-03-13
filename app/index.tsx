@@ -126,7 +126,7 @@ const HomeScreen = () => {
             source={require('../assets/images/coin.png')} 
             style={styles.navIcon}
           />
-          <Text style={styles.navText}>Settings</Text>
+          <Text style={styles.navText}>Achievements</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navButton}>
