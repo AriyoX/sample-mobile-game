@@ -15,6 +15,7 @@ const MAPPING = {
   'puzzlepiece.fill': 'extension', // Add this line for the puzzle icon
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left', // Add this line for the back button
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

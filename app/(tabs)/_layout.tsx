@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -10,6 +11,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
 
   return (
     <Tabs
@@ -24,6 +26,17 @@ export default function TabLayout() {
           },
           default: {},
         }),
+        // Add a back button to each header
+        headerLeft: () => (
+          <TouchableOpacity
+            style={{ marginLeft: 16 }}
+            onPress={() => router.push('/')}
+            accessibilityLabel="Go back to home"
+            accessibilityHint="Returns to the main menu"
+          >
+            <IconSymbol size={28} name="chevron.left" color="#5D3A00" />
+          </TouchableOpacity>
+        ),
       }}>
       <Tabs.Screen
         name="index"
