@@ -11,6 +11,11 @@ const HomeScreen = () => {
     router.push(`/${game}`); // No more (tabs) prefix
   };
   
+  // Add navigation to achievements screen
+  const navigateToScreen = (screen: 'achievements') => {
+    router.push(`/${screen}`);
+  };
+  
   // For index tab, we need a separate method
   const navigateToHome = () => {
     router.push('/');
@@ -113,7 +118,10 @@ const HomeScreen = () => {
       
       {/* Bottom navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={navigateToHome}
+        >
           <Image 
             source={require('../assets/images/coin.png')} 
             style={[styles.navIcon, styles.activeNavIcon]}
@@ -121,7 +129,12 @@ const HomeScreen = () => {
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={() => navigateToScreen('achievements')}
+          accessibilityLabel="Achievements screen"
+          accessibilityHint="View your earned achievements and progress"
+        >
           <Image 
             source={require('../assets/images/coin.png')} 
             style={styles.navIcon}

@@ -136,6 +136,25 @@ export default function RootLayout() {
           }}
         />
         
+        <Stack.Screen
+          name="achievements"
+          options={{
+            title: 'Achievements',
+            headerStyle: { backgroundColor: '#F9F9F9' },
+            headerTintColor: '#333',
+            headerLeft: () => (
+              <TouchableOpacity
+                style={{ marginLeft: 16 }}
+                onPress={goBackToHome}
+                accessibilityLabel="Go back to home"
+                accessibilityHint="Returns to the home screen"
+              >
+                <IconSymbol size={28} name="chevron.left" color="#333" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
