@@ -1,0 +1,11 @@
+Reading Game
+- Adding more Ugandan folklore stories
+- Implementing simple comprehension questions after each story
+- Adding animations to the character mascot
+- Including background music
+- Creating a pronunciation mode for difficult words
+
+All Games
+- Progress Tracking
+- Refresh
+- Levels

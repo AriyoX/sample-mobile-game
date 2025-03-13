@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, Animated } from 'react-native';
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,6 +29,8 @@ const WordGameScreen = () => {
   const letterRefs = useRef({});
   const wordSlotRefs = useRef({});
   const containerRef = useRef(null);
+  
+  const router = useRouter();
   
   useEffect(() => {
     // Load sounds
@@ -326,6 +329,16 @@ const WordGameScreen = () => {
           />
         </TouchableOpacity>
       </View>
+
+      {/* Reading Game button */}
+      <TouchableOpacity 
+        style={styles.gameButton}
+        onPress={() => router.push('/(tabs)/reading')}
+        accessibilityLabel="Go to Reading Game"
+        accessibilityRole="button"
+      >
+        <Text style={styles.gameButtonText}>Reading Game</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -473,6 +486,19 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+  },
+  gameButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  gameButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

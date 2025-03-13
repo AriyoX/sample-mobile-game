@@ -37,6 +37,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="reading"
+        options={{
+          title: 'Reading Game',
+          headerStyle: {
+            backgroundColor: '#F5E9BE',
+          },
+          headerTintColor: '#5D3A00',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
