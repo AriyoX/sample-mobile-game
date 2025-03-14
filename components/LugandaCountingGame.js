@@ -7,7 +7,8 @@ import {
   TouchableOpacity, 
   Animated, 
   Dimensions,
-  SafeAreaView
+  SafeAreaView,
+  Alert // Add Alert import
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
@@ -46,6 +47,7 @@ const LugandaCountingGame = () => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [sound, setSound] = useState(null);
+  const [numberOptions, setNumberOptions] = useState([]); // Add this state to store options
   
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -78,10 +80,33 @@ const LugandaCountingGame = () => {
       scale: 0.8 + Math.random() * 0.4,
     }));
     
+    // Generate number options here and store them in state
+    const correctAnswer = itemCount;
+    const options = [correctAnswer];
+    
+    // Generate all possible options that are within range
+    const possibleOptions = [];
+    for (let i = 1; i <= 10; i++) {
+      if (i !== correctAnswer) {
+        possibleOptions.push(i);
+      }
+    }
+    
+    // Randomly select 2 more options
+    while (options.length < 3 && possibleOptions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * possibleOptions.length);
+      options.push(possibleOptions[randomIndex]);
+      possibleOptions.splice(randomIndex, 1);
+    }
+    
+    // Shuffle the options
+    options.sort(() => Math.random() - 0.5);
+    
     setCurrentItem(newItem);
     setItemsToCount(newItemsToCount);
     setSelectedCount(null);
     setShowFeedback(false);
+    setNumberOptions(options); // Store generated options
   };
   
   const playNumberSound = async (number) => {
@@ -104,6 +129,7 @@ const LugandaCountingGame = () => {
     }
   };
   
+  // Modify the handleNumberPress function to allow retrying after incorrect answers
   const handleNumberPress = (number) => {
     setSelectedCount(number);
     playNumberSound(number);
@@ -144,37 +170,39 @@ const LugandaCountingGame = () => {
         rotateAnim.setValue(0);
       });
       
-      // Move to next level after a delay
+      // Move to next level after a delay, but only if not at level 10
       setTimeout(() => {
-        setCurrentLevel(prevLevel => prevLevel + 1);
+        if (currentLevel < 10) {
+          setCurrentLevel(prevLevel => prevLevel + 1);
+        } else {
+          // Game completed!
+          Alert.alert(
+            "Oyenze bulungi! (Well done!)",
+            `Congratulations! You've completed all 10 levels with a score of ${score + 10}!`,
+            [
+              { 
+                text: "Play Again", 
+                onPress: () => {
+                  setCurrentLevel(1);
+                  setScore(0);
+                } 
+              }
+            ]
+          );
+        }
+      }, 1500);
+    } else {
+      // For incorrect answers, clear feedback after a short delay to allow another try
+      setTimeout(() => {
+        setShowFeedback(false);
+        setSelectedCount(null);
       }, 1500);
     }
   };
   
-  // Alternative implementation for generating options
+  // Modify renderNumberOptions to use the stored options instead of generating new ones
   const renderNumberOptions = () => {
-    const correctAnswer = itemsToCount.length;
-    const options = [correctAnswer];
-    
-    // Generate all possible options that are within range
-    const possibleOptions = [];
-    for (let i = 1; i <= 10; i++) {
-      if (i !== correctAnswer) {
-        possibleOptions.push(i);
-      }
-    }
-    
-    // Randomly select 2 more options
-    while (options.length < 3 && possibleOptions.length > 0) {
-      const randomIndex = Math.floor(Math.random() * possibleOptions.length);
-      options.push(possibleOptions[randomIndex]);
-      possibleOptions.splice(randomIndex, 1);
-    }
-    
-    // Shuffle the options
-    options.sort(() => Math.random() - 0.5);
-    
-    return options.map(number => (
+    return numberOptions.map(number => (
       <TouchableOpacity
         key={number}
         style={[
@@ -182,7 +210,7 @@ const LugandaCountingGame = () => {
           selectedCount === number && (isCorrect ? styles.correctButton : styles.incorrectButton)
         ]}
         onPress={() => handleNumberPress(number)}
-        disabled={showFeedback}
+        disabled={showFeedback && isCorrect} // Only disable if showing correct feedback
       >
         <Text style={styles.numberText}>{number}</Text>
         <Text style={styles.lugandaText}>
