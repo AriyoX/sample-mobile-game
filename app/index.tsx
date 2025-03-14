@@ -7,7 +7,7 @@ const HomeScreen = () => {
   const router = useRouter();
 
   // Fixed typing issue by using specific route paths
-  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore' | 'luganda') => {
+  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore' | 'luganda' | 'counting') => {
     router.push(`/${game}`); // No more (tabs) prefix
   };
   
@@ -110,6 +110,25 @@ const HomeScreen = () => {
             />
             <Text style={styles.gameTitle}>Luganda{'\n'}Learning</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Add new row for counting game */}
+        <View style={styles.gameRow}>
+          <TouchableOpacity 
+            style={[styles.gameCard, styles.countingCard]}
+            onPress={() => navigateToGame('counting')}
+            accessibilityLabel="Luganda Counting"
+            accessibilityHint="Learn to count in Luganda language"
+          >
+            <Image 
+              source={require('../assets/images/blocks.png')}
+              style={styles.gameIcon}
+            />
+            <Text style={styles.gameTitle}>Luganda{'\n'}Counting</Text>
+          </TouchableOpacity>
+
+          {/* Empty placeholder or future game */}
+          <View style={{width: '48%'}} />
         </View>
         
         {/* Add padding at bottom to prevent navigation from covering content */}
@@ -263,6 +282,9 @@ const styles = StyleSheet.create({
   },
   lugandaCard: {
     backgroundColor: '#E3F2FD',
+  },
+  countingCard: {
+    backgroundColor: '#FFCDD2',
   },
   gameIcon: {
     width: 65, // Increased from 50
