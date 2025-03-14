@@ -7,7 +7,7 @@ const HomeScreen = () => {
   const router = useRouter();
 
   // Fixed typing issue by using specific route paths
-  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore' | 'luganda' | 'counting') => {
+  const navigateToGame = (game: 'word' | 'reading' | 'puzzle' | 'explore' | 'luganda' | 'counting' | 'music' ) => {
     router.push(`/${game}`); // No more (tabs) prefix
   };
   
@@ -128,7 +128,18 @@ const HomeScreen = () => {
           </TouchableOpacity>
 
           {/* Empty placeholder or future game */}
-          <View style={{width: '48%'}} />
+          <TouchableOpacity 
+            style={[styles.gameCard, styles.lugandaCard]}
+            onPress={() => navigateToGame('music')}
+            accessibilityLabel="Music Practice"
+            accessibilityHint="Experiment with music and sounds"
+          >
+            <Image 
+              source={require('../assets/images/blocks.png')}
+              style={styles.gameIcon}
+            />
+            <Text style={styles.gameTitle}>Music{'\n'}Practice</Text>
+          </TouchableOpacity>
         </View>
         
         {/* Add padding at bottom to prevent navigation from covering content */}
