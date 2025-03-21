@@ -3,10 +3,11 @@ import { StyleSheet, View, Text, Image, TouchableOpacity, Dimensions, SafeAreaVi
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
 import * as Animatable from 'react-native-animatable';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const { width, height } = Dimensions.get('window');
 
-const LugandaMusicGame = () => {
+const LugandaMusicGame = ({ navigation }) => {
   const [sounds, setSounds] = useState({});
   const [currentInstrument, setCurrentInstrument] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,6 +21,49 @@ const LugandaMusicGame = () => {
   
   // Reference for timeouts to allow cleanup
   const timeoutRef = useRef(null);
+
+  // Add dimensions state
+  const [dimensions, setDimensions] = useState(Dimensions.get('window'));
+
+  // Set landscape orientation when component mounts
+  useEffect(() => {
+    const setLandscapeOrientation = async () => {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE
+      );
+    };
+    
+    setLandscapeOrientation();
+    
+    // Clean up and reset to portrait when unmounting
+    return () => {
+      const resetOrientation = async () => {
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT
+        );
+      };
+      
+      resetOrientation();
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions(window);
+    });
+
+    return () => {
+      subscription?.remove();
+      // Your existing cleanup code
+      Object.values(sounds).forEach(sound => {
+        if (sound) sound.unloadAsync();
+      });
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Luganda traditional instruments
   const instruments = [
@@ -203,6 +247,7 @@ const LugandaMusicGame = () => {
     playPattern();
   };
 
+  // Modify renderInstruments to use a horizontal layout in landscape
   const renderInstruments = () => {
     return instruments.map((instrument) => (
       <Animatable.View
@@ -214,10 +259,14 @@ const LugandaMusicGame = () => {
         <TouchableOpacity
           style={[
             styles.instrumentButton,
+            {
+              // Adjust size based on orientation
+              width: dimensions.width * 0.2, // Smaller in landscape
+              height: dimensions.height * 0.3,
+            },
             currentInstrument === instrument.id && styles.activeInstrument
           ]}
           onPress={() => playSound(instrument.id)}
-          // Removed the disabled={isPlaying} to eliminate lag
         >
           <Image
             source={instrument.image}
@@ -230,86 +279,107 @@ const LugandaMusicGame = () => {
     ));
   };
 
+  // Modify the main return to use landscape layout
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
       
-      <View style={styles.header}>
-        <Text style={styles.title}>Ebisinde by'e Uganda</Text>
-        <Text style={styles.subtitle}>Kozesa ebisinde by'e Uganda</Text>
-      </View>
-      
-      <View style={styles.instrumentsContainer}>
-        {renderInstruments()}
-      </View>
-      
-      <View style={styles.instructionsContainer}>
-        <Text style={styles.instructionText}>
-          {patternMode 
-            ? message || 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
-            : 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
-          }
-        </Text>
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        {!patternMode ? (
-          <TouchableOpacity 
-            style={styles.patternButton}
-            onPress={startPatternGame}
+      {/* Re-arrange for landscape */}
+      <View style={styles.landscapeLayout}>
+        <View style={styles.leftPanel}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Ebisinde by'e Uganda</Text>
+            <Text style={styles.subtitle}>Kozesa ebisinde by'e Uganda</Text>
+          </View>
+          
+          <View style={styles.instructionsContainer}>
+            <Text style={styles.instructionText}>
+              {patternMode 
+                ? message || 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
+                : 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
+              }
+            </Text>
+          </View>
+          
+          <Animatable.View 
+            animation="bounceIn"
+            style={styles.characterContainer}
           >
-            <Text style={styles.buttonText}>Zanya "Olukwatagana"</Text>
-          </TouchableOpacity>
-        ) : patternPlaying ? (
-          <TouchableOpacity 
-            style={styles.skipButton}
-            onPress={skipPattern}
-          >
-            <Text style={styles.buttonText}>Buuka</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity 
-            style={styles.patternButton}
-            onPress={playPattern}
-          >
-            <Text style={styles.buttonText}>Ddamu Olukwatagana</Text>
-          </TouchableOpacity>
-        )}
+            <Image
+              source={require('../assets/images/coin.png')}
+              style={styles.characterImage}
+              resizeMode="contain"
+            />
+          </Animatable.View>
+          
+          <View style={styles.buttonContainer}>
+            {!patternMode ? (
+              <TouchableOpacity 
+                style={styles.patternButton}
+                onPress={startPatternGame}
+              >
+                <Text style={styles.buttonText}>Zanya "Olukwatagana"</Text>
+              </TouchableOpacity>
+            ) : patternPlaying ? (
+              <TouchableOpacity 
+                style={styles.skipButton}
+                onPress={skipPattern}
+              >
+                <Text style={styles.buttonText}>Buuka</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                style={styles.patternButton}
+                onPress={playPattern}
+              >
+                <Text style={styles.buttonText}>Ddamu Olukwatagana</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+        
+        <View style={styles.rightPanel}>
+          <View style={styles.instrumentsContainer}>
+            {renderInstruments()}
+          </View>
+        </View>
       </View>
-      
-      <Animatable.View 
-        animation="bounceIn"
-        style={styles.characterContainer}
-      >
-        <Image
-          source={require('../assets/images/coin.png')}
-          style={styles.characterImage}
-          resizeMode="contain"
-        />
-      </Animatable.View>
     </SafeAreaView>
   );
 };
 
+// Update styles for landscape
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9E0BB', // Warm background color
+    backgroundColor: '#F9E0BB',
+  },
+  landscapeLayout: {
+    flex: 1,
+    flexDirection: 'row', // Horizontal layout for landscape
+  },
+  leftPanel: {
+    flex: 0.4, // 40% of screen width
     padding: 20,
+    justifyContent: 'space-between',
+  },
+  rightPanel: {
+    flex: 0.6, // 60% of screen width
+    padding: 10,
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#8B4513', // Brown color for text
     marginBottom: 10,
   },
+  title: {
+    fontSize: 24, // Slightly smaller for landscape
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: 5,
+  },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#8B4513',
     opacity: 0.8,
   },
@@ -317,12 +387,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
-    marginTop: 20,
+    alignItems: 'center',
   },
   instrumentButton: {
-    width: width * 0.4,
-    height: width * 0.4,
-    backgroundColor: '#FFD699', // Light orange
+    // Base styles (size is set dynamically in the component)
+    backgroundColor: '#FFD699',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -390,13 +459,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   characterContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   characterImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
 });
 
