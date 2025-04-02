@@ -3,10 +3,13 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, Animated }
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import * as ScreenOrientation from 'expo-screen-orientation'; // Add this import
 
+// Get screen dimensions
 const { width, height } = Dimensions.get('window');
 
 const WordGameScreen = () => {
+  // Keep all existing state variables and refs
   const [currentWord, setCurrentWord] = useState('KANZU');
   const [displayWord, setDisplayWord] = useState('K____');
   const [currentQuestion, setCurrentQuestion] = useState('Traditional attire in Buganda culture');
@@ -32,14 +35,19 @@ const WordGameScreen = () => {
   
   const router = useRouter();
   
+  // Updated useEffect to lock screen orientation
   useEffect(() => {
+    // Lock to landscape orientation
+    async function setLandscapeOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    }
+    
     // Load sounds
     async function loadSounds() {
       const correctSoundObject = new Audio.Sound();
       const wrongSoundObject = new Audio.Sound();
       
       try {
-        // Update paths to use @/ alias for better imports
         await correctSoundObject.loadAsync(require('@/assets/sounds/correct.mp3'));
         await wrongSoundObject.loadAsync(require('@/assets/sounds/wrong.mp3'));
         
@@ -50,34 +58,34 @@ const WordGameScreen = () => {
       }
     }
     
+    setLandscapeOrientation();
     loadSounds();
     
-    // Make sure index 0 is properly referenced for the first letter
     wordSlotRefs.current[0] = wordSlotRefs.current[0] || null;
     
-    // Cleanup on unmount
     return () => {
+      // Reset orientation when component unmounts
+      ScreenOrientation.unlockAsync();
+      
       if (correctSound) correctSound.unloadAsync();
       if (wrongSound) wrongSound.unloadAsync();
     };
   }, []);
   
-  // Function to animate letter flying to destination
+  // Keeping all the existing functionality for animations
   const animateLetterToWord = (letter, letterIndex, destinationIndex) => {
-    // Get the positions of source and destination
+    // All existing animation logic kept intact
     const letterRef = letterRefs.current[letterIndex];
     const wordRef = wordSlotRefs.current[destinationIndex];
     
     if (!letterRef || !wordRef) return;
     
-    // Measure positions relative to container
     letterRef.measureLayout(
       containerRef.current,
       (letterX, letterY, letterWidth, letterHeight) => {
         wordRef.measureLayout(
           containerRef.current,
           (wordX, wordY, wordWidth, wordHeight) => {
-            // Set initial position - this is the key change
             setAnimatingLetter({ 
               letter, 
               index: destinationIndex,
@@ -94,7 +102,6 @@ const WordGameScreen = () => {
             flyingLetterOpacity.setValue(1);
             flyingLetterPosition.setValue({ x: 0, y: 0 });
             
-            // Animate the letter flying
             Animated.parallel([
               Animated.timing(flyingLetterPosition.x, {
                 toValue: wordX - letterX + (wordWidth - letterWidth) / 2,
@@ -119,11 +126,9 @@ const WordGameScreen = () => {
                 }),
               ])
             ]).start(() => {
-              // Hide the flying letter when animation completes
               flyingLetterOpacity.setValue(0);
               setAnimatingLetter(null);
               
-              // Update displayed word
               updateDisplayWord(letter);
             });
           },
@@ -135,7 +140,7 @@ const WordGameScreen = () => {
   };
   
   const updateDisplayWord = (letter) => {
-    // Update displayed word
+    // Existing logic kept intact
     let newDisplay = '';
     for (let i = 0; i < currentWord.length; i++) {
       if (currentWord[i] === letter || displayWord[i] !== '_') {
@@ -147,9 +152,7 @@ const WordGameScreen = () => {
     
     setDisplayWord(newDisplay);
     
-    // Check if word is complete
     if (!newDisplay.includes('_')) {
-      // Word complete animation
       Animated.spring(bounceValue, {
         toValue: 1,
         friction: 3,
@@ -158,14 +161,13 @@ const WordGameScreen = () => {
       }).start(() => {
         setTimeout(() => {
           bounceValue.setValue(0);
-          // Here you would normally load the next word
         }, 1500);
       });
     }
   };
 
   const handleLetterPress = (letter, letterIndex) => {
-    // Animate the letter being pressed
+    // Existing logic kept intact
     Animated.sequence([
       Animated.timing(letterScale, {
         toValue: 1.2,
@@ -180,16 +182,13 @@ const WordGameScreen = () => {
     ]).start();
     
     if (currentWord.includes(letter) && !selectedLetters.includes(letter)) {
-      // Play correct sound
       if (correctSound) {
         correctSound.replayAsync();
       }
       
-      // Update selected letters
       const newSelectedLetters = [...selectedLetters, letter];
       setSelectedLetters(newSelectedLetters);
       
-      // Find all positions where this letter appears in the word
       const positions = [];
       for (let i = 0; i < currentWord.length; i++) {
         if (currentWord[i] === letter && displayWord[i] === '_') {
@@ -197,97 +196,125 @@ const WordGameScreen = () => {
         }
       }
       
-      // Animate to first position (we could do multiple if needed)
       if (positions.length > 0) {
         animateLetterToWord(letter, letterIndex, positions[0]);
       }
     } else {
-      // Play wrong sound
       if (wrongSound) {
         wrongSound.replayAsync();
       }
     }
   };
   
+  // Modified layout for landscape orientation
   return (
     <View ref={containerRef} style={styles.container}>
       <StatusBar style="auto" />
       
-      {/* Top coin */}
-      <View style={styles.coinContainer}>
-        <Image 
-          source={require('@/assets/images/coin.png')} 
-          style={styles.coin}
-          resizeMode="contain"
-        />
-      </View>
-      
-      {/* Question text */}
-      <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>{currentQuestion}</Text>
-      </View>
-      
-      {/* Letter circles */}
-      <View style={styles.lettersContainer}>
-        {letters.map((letter, index) => (
-          <TouchableOpacity 
-            key={index}
-            ref={ref => letterRefs.current[index] = ref}
-            style={[
-              styles.letterCircle,
-              selectedLetters.includes(letter) && styles.letterSelected
-            ]}
-            onPress={() => handleLetterPress(letter, index)}
-            disabled={selectedLetters.includes(letter)}
-          >
-            <Animated.Text 
-              style={[
-                styles.letterText,
-                { transform: [{ scale: letterScale }] }
-              ]}
-            >
-              {letter}
-            </Animated.Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      
-      {/* Word to guess */}
-      <Animated.View 
-        style={[
-          styles.wordContainer,
-          { 
-            transform: [
-              { 
-                scale: bounceValue.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [1, 1.2, 1]
-                })
-              }
-            ] 
-          }
-        ]}
-      >
-        {/* First letter */}
-        <View 
-          style={styles.letterSlotFirst}
-          ref={ref => wordSlotRefs.current[0] = ref}
-        >
-          <Text style={styles.wordText}>{displayWord[0]}</Text>
+      {/* Top bar with coin and question */}
+      <View style={styles.topBar}>
+        {/* Question text */}
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionText}>{currentQuestion}</Text>
         </View>
         
-        {/* Remaining letters */}
-        {displayWord.slice(1).split('').map((char, index) => (
-          <View 
-            key={index} 
-            ref={ref => wordSlotRefs.current[index + 1] = ref}
-            style={styles.letterSlot}
+        {/* Coin */}
+        <View style={styles.coinContainer}>
+          <Image 
+            source={require('@/assets/images/coin.png')} 
+            style={styles.coin}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+      
+      {/* Main content area */}
+      <View style={styles.gameContent}>
+        {/* Left character */}
+        <View style={styles.leftCharacter}>
+          <Image 
+            source={require('@/assets/images/bird.png')} 
+            style={styles.character}
+            resizeMode="contain"
+          />
+        </View>
+        
+        {/* Center game area */}
+        <View style={styles.centerArea}>
+          {/* Word to guess */}
+          <Animated.View 
+            style={[
+              styles.wordContainer,
+              { 
+                transform: [
+                  { 
+                    scale: bounceValue.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [1, 1.2, 1]
+                    })
+                  }
+                ] 
+              }
+            ]}
           >
-            <Text style={styles.wordText}>{char !== '_' ? char : ''}</Text>
-            {char === '_' && <View style={styles.dash} />}
+            {/* First letter */}
+            <View 
+              style={styles.letterSlotFirst}
+              ref={ref => wordSlotRefs.current[0] = ref}
+            >
+              <Text style={styles.wordText}>{displayWord[0]}</Text>
+            </View>
+            
+            {/* Remaining letters */}
+            {displayWord.slice(1).split('').map((char, index) => (
+              <View 
+                key={index} 
+                ref={ref => wordSlotRefs.current[index + 1] = ref}
+                style={styles.letterSlot}
+              >
+                <Text style={styles.wordText}>{char !== '_' ? char : ''}</Text>
+                {char === '_' && <View style={styles.dash} />}
+              </View>
+            ))}
+          </Animated.View>
+          
+          {/* Letter choices */}
+          <View style={styles.lettersContainer}>
+            {letters.map((letter, index) => (
+              <TouchableOpacity 
+                key={index}
+                ref={ref => letterRefs.current[index] = ref}
+                style={[
+                  styles.letterCircle,
+                  selectedLetters.includes(letter) && styles.letterSelected
+                ]}
+                onPress={() => handleLetterPress(letter, index)}
+                disabled={selectedLetters.includes(letter)}
+              >
+                <Animated.Text 
+                  style={[
+                    styles.letterText,
+                    { transform: [{ scale: letterScale }] }
+                  ]}
+                >
+                  {letter}
+                </Animated.Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        ))}
-      </Animated.View>
+        </View>
+        
+        {/* Right hint button */}
+        <View style={styles.rightControls}>
+          <TouchableOpacity style={styles.hintButton}>
+            <Image 
+              source={require('@/assets/images/house.png')} 
+              style={styles.hintImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
       
       {/* Flying letter animation */}
       {animatingLetter && (
@@ -311,61 +338,27 @@ const WordGameScreen = () => {
           <Text style={styles.flyingLetterText}>{animatingLetter.letter}</Text>
         </Animated.View>
       )}
-      
-      {/* Bottom characters */}
-      <View style={styles.charactersContainer}>
-        <Image 
-          source={require('@/assets/images/bird.png')} 
-          style={styles.character}
-          resizeMode="contain"
-        />
-        
-        {/* House hint button */}
-        <TouchableOpacity style={styles.hintButton}>
-          <Image 
-            source={require('@/assets/images/house.png')} 
-          style={styles.hintImage}
-          resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Reading Game button
-      <View style={styles.gameButtonContainer}>
-        <TouchableOpacity 
-          style={styles.gameButton}
-          onPress={() => router.push('/(tabs)/reading')}
-          accessibilityLabel="Go to Reading Game"
-          accessibilityRole="button"
-        >
-          <Text style={styles.gameButtonText}>Reading Game</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.gameButton}
-          onPress={() => router.push('/(tabs)/puzzle')}
-          accessibilityLabel="Go to Puzzle Game"
-          accessibilityRole="button"
-        >
-          <Text style={styles.gameButtonText}>Puzzle Game</Text>
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 };
 
+// Updated styles for landscape orientation
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#9DE7A9', // Light green background
-    alignItems: 'center',
+    padding: 10,
+  },
+  topBar: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 5,
   },
   coinContainer: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
+    marginLeft: 'auto',
   },
   coin: {
     width: 40,
@@ -374,12 +367,9 @@ const styles = StyleSheet.create({
   questionContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderRadius: 20,
-    marginTop: 80,
-    marginBottom: 10,
-    maxWidth: '90%',
-    alignSelf: 'center',
+    maxWidth: '70%',
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -392,17 +382,39 @@ const styles = StyleSheet.create({
     color: '#5D3A00',
     textAlign: 'center',
   },
+  gameContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  leftCharacter: {
+    width: '15%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerArea: {
+    width: '70%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightControls: {
+    width: '15%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   lettersContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 20,
     width: '100%',
+    marginTop: 20,
   },
   letterCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 55,
+    height: 55,
+    borderRadius: 28,
     backgroundColor: '#FF6B95', // Pink color
     margin: 8,
     justifyContent: 'center',
@@ -418,7 +430,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   letterText: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: 'bold',
     color: 'white',
   },
@@ -426,7 +438,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 40,
+    marginBottom: 20,
   },
   wordText: {
     fontSize: 36,
@@ -455,13 +467,6 @@ const styles = StyleSheet.create({
     height: 5,
     backgroundColor: '#5D3A00', // Dark brown
     borderRadius: 2,
-  },
-  charactersContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 20,
   },
   character: {
     width: 80,
@@ -497,25 +502,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-  },
-  gameButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 10,
-    alignSelf: 'center',
-  },
-  gameButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gameButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 10,
   },
 });
 

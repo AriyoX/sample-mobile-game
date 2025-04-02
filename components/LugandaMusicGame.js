@@ -1,11 +1,3 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
-import { Audio } from 'expo-av';
-import { StatusBar } from 'expo-status-bar';
-import * as Animatable from 'react-native-animatable';
-import * as ScreenOrientation from 'expo-screen-orientation';
-
-const { width, height } = Dimensions.get('window');
 
 const LugandaMusicGame = ({ navigation }) => {
   const [sounds, setSounds] = useState({});
@@ -65,33 +57,33 @@ const LugandaMusicGame = ({ navigation }) => {
     };
   }, []);
 
-  // Luganda traditional instruments
+  // Ugandan traditional instruments (translated to English)
   const instruments = [
     {
       id: 'engoma',
-      name: 'Engoma',
-      description: 'Engoma y\'ekisinde ekyobuwangwa',
+      name: 'Engoma Drum',
+      description: 'A traditional Ugandan cultural instrument',
       image: require('../assets/images/coin.png'),
       sound: require('../assets/sounds/correct.mp3'),
     },
     {
       id: 'endingidi',
-      name: 'Endingidi',
-      description: 'Endingidi y\'ekisinde ekyobuwangwa',
+      name: 'Endingidi Fiddle',
+      description: 'A traditional Ugandan cultural instrument',
       image: require('../assets/images/coin.png'),
       sound: require('../assets/sounds/wrong.mp3'),
     },
     {
       id: 'amadinda',
-      name: 'Amadinda',
-      description: 'Amadinda g\'ekisinde ekyobuwangwa',
+      name: 'Amadinda Xylophone',
+      description: 'A traditional Ugandan cultural instrument',
       image: require('../assets/images/coin.png'),
       sound: require('../assets/sounds/correct.mp3'),
     },
     {
       id: 'ensaasi',
-      name: 'Ensaasi',
-      description: 'Ensaasi z\'ekisinde ekyobuwangwa',
+      name: 'Ensaasi Shakers',
+      description: 'A traditional Ugandan cultural instrument',
       image: require('../assets/images/coin.png'),
       sound: require('../assets/sounds/wrong.mp3'),
     },
@@ -180,7 +172,7 @@ const LugandaMusicGame = ({ navigation }) => {
   // Play the traditional pattern
   const playPattern = async () => {
     setPatternPlaying(true);
-    setMessage('Wuliriza olunyiriri lw\'amaloboozi...');
+    setMessage('Listen to the pattern of sounds...');
     setUserPattern([]);
     
     const newPattern = generatePattern();
@@ -200,7 +192,7 @@ const LugandaMusicGame = ({ navigation }) => {
     }
     
     setPatternPlaying(false);
-    setMessage('Kati ggwe gezaako okukola olunyiriri lw\'amaloboozi ge wawulidde');
+    setMessage('Now try to recreate the pattern of sounds you heard');
   };
 
   // Skip the pattern playback
@@ -215,7 +207,7 @@ const LugandaMusicGame = ({ navigation }) => {
     });
     
     setPatternPlaying(false);
-    setMessage('Kati ggwe gezaako okukola olunyiriri lw\'amaloboozi');
+    setMessage('Now try to recreate the pattern of sounds');
   };
 
   // Check if user pattern matches the generated pattern
@@ -230,9 +222,9 @@ const LugandaMusicGame = ({ navigation }) => {
     }
     
     if (correct) {
-      setMessage('Weebale! Okikoze bulungi!');
+      setMessage('Thank you! Well done!');
     } else {
-      setMessage('Gezaako nate!');
+      setMessage('Try again!');
     }
     
     // Reset user pattern after a delay
@@ -288,15 +280,15 @@ const LugandaMusicGame = ({ navigation }) => {
       <View style={styles.landscapeLayout}>
         <View style={styles.leftPanel}>
           <View style={styles.header}>
-            <Text style={styles.title}>Ebisinde by'e Uganda</Text>
-            <Text style={styles.subtitle}>Kozesa ebisinde by'e Uganda</Text>
+            <Text style={styles.title}>Ugandan Musical Instruments</Text>
+            <Text style={styles.subtitle}>Play with Ugandan musical instruments</Text>
           </View>
           
           <View style={styles.instructionsContainer}>
             <Text style={styles.instructionText}>
               {patternMode 
-                ? message || 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
-                : 'Nyiga ku kisinde okuwulira eddoboozi lyakyo'
+                ? message || 'Tap on an instrument to hear its sound'
+                : 'Tap on an instrument to hear its sound'
               }
             </Text>
           </View>
@@ -318,21 +310,21 @@ const LugandaMusicGame = ({ navigation }) => {
                 style={styles.patternButton}
                 onPress={startPatternGame}
               >
-                <Text style={styles.buttonText}>Zanya "Olukwatagana"</Text>
+                <Text style={styles.buttonText}>Play "Pattern Match"</Text>
               </TouchableOpacity>
             ) : patternPlaying ? (
               <TouchableOpacity 
                 style={styles.skipButton}
                 onPress={skipPattern}
               >
-                <Text style={styles.buttonText}>Buuka</Text>
+                <Text style={styles.buttonText}>Skip</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity 
                 style={styles.patternButton}
                 onPress={playPattern}
               >
-                <Text style={styles.buttonText}>Ddamu Olukwatagana</Text>
+                <Text style={styles.buttonText}>Repeat Pattern</Text>
               </TouchableOpacity>
             )}
           </View>
