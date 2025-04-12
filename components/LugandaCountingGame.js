@@ -8,10 +8,11 @@ import {
   Animated, 
   Dimensions,
   SafeAreaView,
-  Alert // Add Alert import
+  Alert
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
+import * as ScreenOrientation from 'expo-screen-orientation'; // Add screen orientation import
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,9 +49,36 @@ const LugandaCountingGame = () => {
   const [score, setScore] = useState(0);
   const [sound, setSound] = useState(null);
   const [numberOptions, setNumberOptions] = useState([]); // Add this state to store options
+  const [dimensions, setDimensions] = useState({ width, height });
   
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  // Add orientation locking
+  useEffect(() => {
+    // Lock to landscape orientation
+    async function setLandscapeOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    }
+    
+    setLandscapeOrientation();
+    
+    return () => {
+      // Reset orientation when component unmounts
+      ScreenOrientation.unlockAsync();
+    };
+  }, []);
+  
+  // Add listener for dimension changes
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions(window);
+    });
+    
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
   
   // Setup level when component mounts or level changes
   useEffect(() => {
@@ -245,32 +273,49 @@ const LugandaCountingGame = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Balanga - Counting Game</Text>
-        <View style={styles.scoreContainer}>
-          <Text style={styles.scoreText}>Score: {score}</Text>
+      {/* Main content area - remove top bar to prevent content overflow */}
+      <View style={styles.gameContent}>
+        {/* Left section - Level and character */}
+        <View style={styles.leftSection}>
+          <View style={styles.levelContainer}>
+            <Text style={styles.levelText}>Level {currentLevel}</Text>
+          </View>
+          
+          <Image 
+            source={require('../assets/images/bird.png')} 
+            style={styles.characterImage}
+            resizeMode="contain"
+          />
+          
+          <View style={styles.scoreContainer}>
+            <Text style={styles.scoreText}>Score: {score}</Text>
+          </View>
         </View>
-      </View>
-      
-      {/* Level indicator */}
-      <View style={styles.levelContainer}>
-        <Text style={styles.levelText}>Level {currentLevel}</Text>
-      </View>
-      
-      {/* Question prompt */}
-      <View style={styles.promptContainer}>
-        <Text style={styles.promptText}>
-          Balanga {currentItem.name} emeka?
-        </Text>
-        <Text style={styles.promptTextEnglish}>
-          (How many {currentItem.name} do you see?)
-        </Text>
-      </View>
-      
-      {/* Items to count */}
-      <View style={styles.itemsContainer}>
-        {renderItemsToCount()}
+        
+        {/* Center section - Items to count and prompt */}
+        <View style={styles.centerSection}>
+          {/* Question prompt */}
+          <View style={styles.promptContainer}>
+            <Text style={styles.promptText}>
+              Balanga {currentItem.name} emeka?
+            </Text>
+            <Text style={styles.promptTextEnglish}>
+              (How many {currentItem.name} do you see?)
+            </Text>
+          </View>
+          
+          {/* Items to count */}
+          <View style={styles.itemsContainer}>
+            {renderItemsToCount()}
+          </View>
+        </View>
+        
+        {/* Right section - Number options */}
+        <View style={styles.rightSection}>
+          <View style={styles.optionsContainer}>
+            {renderNumberOptions()}
+          </View>
+        </View>
       </View>
       
       {/* Feedback animation */}
@@ -299,13 +344,6 @@ const LugandaCountingGame = () => {
           </Text>
         </Animated.View>
       )}
-      
-      {/* Number options */}
-      <View style={styles.optionsContainer}>
-        {renderNumberOptions()}
-      </View>
-      
-      
     </SafeAreaView>
   );
 };
@@ -314,16 +352,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFECB3', // Warm yellow background
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  header: {
+  topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 20,
     paddingTop: 10,
+    paddingBottom: 5,
   },
   headerText: {
     fontSize: 24,
@@ -341,30 +378,59 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  gameContent: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  leftSection: {
+    width: '15%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
   levelContainer: {
     backgroundColor: '#8BC34A', // Light green
     paddingHorizontal: 20,
     paddingVertical: 5,
     borderRadius: 20,
-    marginTop: 10,
+    marginBottom: 20,
   },
   levelText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
   },
+  characterImage: {
+    width: 80,
+    height: 80,
+  },
+  centerSection: {
+    width: '70%',
+    alignItems: 'center',
+  },
   promptContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   promptText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#5D3A00', // Dark brown
     textAlign: 'center',
   },
   promptTextEnglish: {
-    fontSize: 16,
+    fontSize: 14,
     fontStyle: 'italic',
     color: '#5D3A00', // Dark brown
     opacity: 0.7,
@@ -372,13 +438,50 @@ const styles = StyleSheet.create({
   },
   itemsContainer: {
     width: '100%',
-    height: height * 0.4,
+    height: 200,
     position: 'relative',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 15,
   },
-  countItem: {
-    width: 60,
-    height: 60,
-    position: 'absolute',
+  rightSection: {
+    width: '15%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionsContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    height: '80%',
+  },
+  numberButton: {
+    width: 65,
+    height: 65,
+    borderRadius: 35,
+    backgroundColor: '#F57C00', // Orange
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  correctButton: {
+    backgroundColor: '#4CAF50', // Green
+  },
+  incorrectButton: {
+    backgroundColor: '#F44336', // Red
+  },
+  numberText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  lugandaText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: 'white',
   },
   feedbackContainer: {
     position: 'absolute',
@@ -389,6 +492,10 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 30,
     elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
   feedbackText: {
     fontSize: 24,
@@ -400,47 +507,7 @@ const styles = StyleSheet.create({
   },
   incorrectText: {
     color: '#F44336', // Red
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
-    marginBottom: 20,
-  },
-  numberButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F57C00', // Orange
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  correctButton: {
-    backgroundColor: '#4CAF50', // Green
-  },
-  incorrectButton: {
-    backgroundColor: '#F44336', // Red
-  },
-  numberText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  lugandaText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  characterContainer: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  characterImage: {
-    width: 100,
-    height: 120,
-  },
+  }
 });
 
 export default LugandaCountingGame;
